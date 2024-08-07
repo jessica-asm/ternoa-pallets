@@ -59,7 +59,7 @@
 // 				|_id,
 // 				 old: OldRentContractData<
 // 					T::AccountId,
-// 					T::BlockNumber,
+// 					BlockNumberFor<T>,
 // 					BalanceOf<T>,
 // 					T::AccountSizeLimit,
 // 				>| {

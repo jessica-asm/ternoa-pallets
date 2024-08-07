@@ -28,7 +28,8 @@ pub use weights::WeightInfo;
 
 use core::convert::TryFrom;
 use frame_support::{
-	dispatch::{DispatchError, DispatchResult},
+	sp_runtime::DispatchError,
+	dispatch::{ DispatchResult},
 	ensure,
 	pallet_prelude::DispatchResultWithPostInfo,
 	traits::{
@@ -57,7 +58,7 @@ pub type NegativeImbalanceOf<T> = <<T as Config>::Currency as Currency<
 >>::NegativeImbalance;
 pub type RentContractDataOf<T> = RentContractData<
 	<T as frame_system::Config>::AccountId,
-	<T as frame_system::Config>::BlockNumber,
+	BlockNumberFor::<T>,
 	BalanceOf<T>,
 	<T as Config>::AccountSizeLimit,
 >;
@@ -124,7 +125,7 @@ pub mod pallet {
 		_,
 		Blake2_128Concat,
 		NFTId,
-		RentContractData<T::AccountId, T::BlockNumber, BalanceOf<T>, T::AccountSizeLimit>,
+		RentContractData<T::AccountId, BlockNumberFor<T>, BalanceOf<T>, T::AccountSizeLimit>,
 		OptionQuery,
 	>;
 
@@ -132,7 +133,7 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn queues)]
 	pub type Queues<T: Config> =
-		StorageValue<_, RentingQueues<T::BlockNumber, T::SimultaneousContractLimit>, ValueQuery>;
+		StorageValue<_, RentingQueues<BlockNumberFor<T>, T::SimultaneousContractLimit>, ValueQuery>;
 
 	/// Data related to rent contracts offers.
 	#[pallet::storage]
@@ -152,7 +153,7 @@ pub mod pallet {
 		ContractCreated {
 			nft_id: NFTId,
 			renter: T::AccountId,
-			duration: Duration<T::BlockNumber>,
+			duration: Duration<BlockNumberFor<T>>,
 			acceptance_type: AcceptanceType<AccountList<T::AccountId, T::AccountSizeLimit>>,
 			renter_can_revoke: bool,
 			rent_fee: RentFee<BalanceOf<T>>,
@@ -170,8 +171,8 @@ pub mod pallet {
 		/// A contract subscription's terms were changed by renter.
 		ContractSubscriptionTermsChanged {
 			nft_id: NFTId,
-			period: T::BlockNumber,
-			max_duration: T::BlockNumber,
+			period: BlockNumberFor<T>,
+			max_duration: BlockNumberFor<T>,
 			is_changeable: bool,
 			rent_fee: BalanceOf<T>,
 		},
@@ -281,7 +282,7 @@ pub mod pallet {
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 		// Basic hooks
 		/// Weight: see `begin_block`
-		fn on_initialize(now: T::BlockNumber) -> Weight {
+		fn on_initialize(now: BlockNumberFor<T>) -> Weight {
 			let mut read = 1u64;
 			let mut write = 0u64;
 			let mut current_actions = 0;
@@ -355,7 +356,7 @@ pub mod pallet {
 		pub fn create_contract(
 			origin: OriginFor<T>,
 			nft_id: NFTId,
-			duration: DurationInput<T::BlockNumber>,
+			duration: DurationInput<BlockNumberFor<T>>,
 			acceptance_type: AcceptanceType<AccountList<T::AccountId, T::AccountSizeLimit>>,
 			renter_can_revoke: bool,
 			rent_fee: RentFee<BalanceOf<T>>,
@@ -376,7 +377,7 @@ pub mod pallet {
 				Error::<T>::ContractNFTNotInAValidState
 			);
 
-			let duration_limit: T::BlockNumber = T::MaximumContractDurationLimit::get().into();
+			let duration_limit: BlockNumberFor<T> = T::MaximumContractDurationLimit::get().into();
 			let duration = duration.to_duration(duration_limit.clone());
 			let full_duration = *duration.get_full_duration();
 			let block_duration_or_period = *duration.get_duration_or_period();
@@ -574,7 +575,7 @@ pub mod pallet {
 		pub fn rent(
 			origin: OriginFor<T>,
 			nft_id: NFTId,
-			signed_creation_block: T::BlockNumber,
+			signed_creation_block: BlockNumberFor<T>,
 		) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
 			let pallet = Self::account_id();
@@ -637,7 +638,7 @@ pub mod pallet {
 		pub fn make_rent_offer(
 			origin: OriginFor<T>,
 			nft_id: NFTId,
-			signed_creation_block: T::BlockNumber,
+			signed_creation_block: BlockNumberFor<T>,
 		) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
 
@@ -806,12 +807,12 @@ pub mod pallet {
 			origin: OriginFor<T>,
 			nft_id: NFTId,
 			rent_fee: BalanceOf<T>,
-			period: T::BlockNumber,
-			max_duration: Option<T::BlockNumber>,
+			period: BlockNumberFor<T>,
+			max_duration: Option<BlockNumberFor<T>>,
 			is_changeable: bool,
 		) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
-			let duration_limit: T::BlockNumber = T::MaximumContractDurationLimit::get().into();
+			let duration_limit: BlockNumberFor<T> = T::MaximumContractDurationLimit::get().into();
 			let max_duration = max_duration.unwrap_or_else(|| duration_limit.clone());
 
 			Contracts::<T>::try_mutate(nft_id, |x| -> DispatchResult {
@@ -867,8 +868,8 @@ pub mod pallet {
 			origin: OriginFor<T>,
 			nft_id: NFTId,
 			rent_fee: BalanceOf<T>,
-			period: T::BlockNumber,
-			max_duration: Option<T::BlockNumber>,
+			period: BlockNumberFor<T>,
+			max_duration: Option<BlockNumberFor<T>>,
 			is_changeable: bool,
 		) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
@@ -955,8 +956,8 @@ impl<T: Config> Pallet<T> {
 
 	pub fn handle_subscription_contract(
 		nft_id: NFTId,
-		now: &T::BlockNumber,
-	) -> Option<T::BlockNumber> {
+		now: &BlockNumberFor<T>,
+	) -> Option<BlockNumberFor<T>> {
 		let contract = Contracts::<T>::get(nft_id)?;
 		let rentee = contract.rentee.as_ref()?;
 		let rent_fee = contract.rent_fee.get_balance()?;
@@ -1090,7 +1091,7 @@ impl<T: Config> Pallet<T> {
 	/// Fill available queue. (benchmarks)
 	pub fn benchmark_fill_available_queue(
 		number: u32,
-		block_numer: T::BlockNumber,
+		block_numer: BlockNumberFor<T>,
 	) -> Result<(), DispatchError> {
 		Queues::<T>::try_mutate(|x| -> DispatchResult {
 			x.bulk_insert(999, block_numer, QueueKind::Available, number)

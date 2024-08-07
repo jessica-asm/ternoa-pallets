@@ -198,7 +198,7 @@ pub mod pallet {
 		_,
 		Blake2_128Concat,
 		T::AccountId,
-		TeeStakingLedger<T::AccountId, T::BlockNumber, BalanceOf<T>>,
+		TeeStakingLedger<T::AccountId, BlockNumberFor<T>, BalanceOf<T>>,
 		OptionQuery,
 	>;
 
@@ -257,7 +257,7 @@ pub mod pallet {
 		// 	weight
 		// }
 
-		fn on_initialize(now: T::BlockNumber) -> frame_support::weights::Weight {
+		fn on_initialize(now: BlockNumberFor<T>) -> frame_support::weights::Weight {
 			let mut read = 0u64;
 			let write = 0u64;
 
@@ -362,7 +362,7 @@ pub mod pallet {
 		/// Rewards claimed by operator
 		RewardsClaimed { era: EraIndex, operator_address: T::AccountId, amount: BalanceOf<T> },
 		/// Fetching active era during the last session in an era
-		FailedToGetActiveEra { block_number: T::BlockNumber },
+		FailedToGetActiveEra { block_number: BlockNumberFor<T> },
 		/// Staking amount is set
 		StakingAmountIsSet { amount: BalanceOf<T> },
 		/// Reward amount is set

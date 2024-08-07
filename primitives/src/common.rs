@@ -16,11 +16,12 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use frame_support::{dispatch::Codec, BoundedVec};
+use frame_support::{ BoundedVec};
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use sp_arithmetic::per_things::Permill;
 use sp_runtime::RuntimeDebug;
+use parity_scale_codec::Codec;
 
 pub type U8BoundedVec<S> = BoundedVec<u8, S>;
 

@@ -65,7 +65,7 @@ benchmarks! {
 		let alice_origin = origin::<T>("ALICE");
 		let bob: T::AccountId = get_account::<T>("BOB");
 		let protocol:TransmissionProtocol<
-			T::BlockNumber,
+			BlockNumberFor<T>,
 			ConsentList<T::AccountId, T::MaxConsentListSize>,
 		> = TransmissionProtocol::AtBlock(10u32.into());
 		let cancellation = CancellationPeriod::None;
@@ -84,7 +84,7 @@ benchmarks! {
 		let alice_origin = origin::<T>("ALICE");
 		let bob: T::AccountId = get_account::<T>("BOB");
 		let protocol:TransmissionProtocol<
-			T::BlockNumber,
+			BlockNumberFor<T>,
 			ConsentList<T::AccountId, T::MaxConsentListSize>,
 		> = TransmissionProtocol::AtBlock(10u32.into());
 		let cancellation = CancellationPeriod::UntilBlock(20u32.into());
@@ -104,7 +104,7 @@ benchmarks! {
 		let alice_origin = origin::<T>("ALICE");
 		let bob: T::AccountId = get_account::<T>("BOB");
 		let protocol:TransmissionProtocol<
-			T::BlockNumber,
+			BlockNumberFor<T>,
 			ConsentList<T::AccountId, T::MaxConsentListSize>,
 		> = TransmissionProtocol::AtBlockWithReset(10u32.into());
 		let cancellation = CancellationPeriod::None;
@@ -127,7 +127,7 @@ benchmarks! {
 		let charlie: T::AccountId = get_account::<T>("CHARLIE");
 		let consent_list = BoundedVec::try_from(vec![alice.clone(), bob.clone(), charlie]).unwrap();
 		let protocol:TransmissionProtocol<
-			T::BlockNumber,
+			BlockNumberFor<T>,
 			ConsentList<T::AccountId, T::MaxConsentListSize>,
 		> = TransmissionProtocol::OnConsentAtBlock {
 			consent_list,

@@ -26,7 +26,8 @@ pub use pallet::*;
 pub use types::*;
 
 use frame_support::{
-	dispatch::{DispatchError, DispatchResult},
+	sp_runtime::DispatchError,
+	dispatch::{DispatchResult},
 	ensure,
 	pallet_prelude::DispatchResultWithPostInfo,
 	traits::{

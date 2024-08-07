@@ -19,9 +19,9 @@
 pub use pallet::*;
 
 use frame_support::{
-	dispatch::{DispatchResultWithPostInfo, GetDispatchInfo, UnfilteredDispatchable},
+	dispatch::{DispatchResultWithPostInfo, GetDispatchInfo},
 	pallet_prelude::*,
-	traits::StorageVersion,
+	traits::{StorageVersion, UnfilteredDispatchable }
 };
 use frame_system::pallet_prelude::*;
 use sp_std::prelude::*;

@@ -15,7 +15,8 @@
 // along with Ternoa.  If not, see <http://www.gnu.org/licenses/>.
 
 use frame_support::{
-	traits::Get, BoundedVec, CloneNoBound, PartialEqNoBound, RuntimeDebug, RuntimeDebugNoBound,
+	traits::Get, BoundedVec, CloneNoBound, PartialEqNoBound, RuntimeDebugNoBound,
+	pallet_prelude::RuntimeDebug,
 };
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use primitives::nfts::NFTId;

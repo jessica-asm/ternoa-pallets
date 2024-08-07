@@ -17,13 +17,15 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use frame_support::{
-	inherent::Vec, traits::Get, BoundedVec, CloneNoBound, PartialEqNoBound, RuntimeDebug,
+	traits::Get, BoundedVec, CloneNoBound, PartialEqNoBound,
 	RuntimeDebugNoBound,
 };
+use sp_std::vec::Vec;
 use parity_scale_codec::{Decode, Encode, MaxEncodedLen};
 use scale_info::TypeInfo;
 use sp_arithmetic::per_things::Permill;
 use sp_std::fmt::Debug;
+use sp_runtime::RuntimeDebug;
 
 use crate::U8BoundedVec;
 

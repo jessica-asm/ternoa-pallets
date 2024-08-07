@@ -83,23 +83,23 @@ pub mod pallet {
 
 		/// Minimum required length of auction.
 		#[pallet::constant]
-		type MinAuctionDuration: Get<Self::BlockNumber>;
+		type MinAuctionDuration: Get<BlockNumberFor<Self>>;
 
 		/// Maximum permitted length of auction.
 		#[pallet::constant]
-		type MaxAuctionDuration: Get<Self::BlockNumber>;
+		type MaxAuctionDuration: Get<BlockNumberFor<Self>>;
 
 		/// Maximum distance between the current block and the start block of an auction.
 		#[pallet::constant]
-		type MaxAuctionDelay: Get<Self::BlockNumber>;
+		type MaxAuctionDelay: Get<BlockNumberFor<Self>>;
 
 		/// Grace period to extend auction by if new bid received.
 		#[pallet::constant]
-		type AuctionGracePeriod: Get<Self::BlockNumber>;
+		type AuctionGracePeriod: Get<BlockNumberFor<Self>>;
 
 		/// Ending period during which an auction can be extended.
 		#[pallet::constant]
-		type AuctionEndingPeriod: Get<Self::BlockNumber>;
+		type AuctionEndingPeriod: Get<BlockNumberFor<Self>>;
 
 		/// The auctions pallet id - will be used to generate account id.
 		#[pallet::constant]
@@ -121,7 +121,7 @@ pub mod pallet {
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 		/// Weight: see `begin_block`.
-		fn on_initialize(now: T::BlockNumber) -> Weight {
+		fn on_initialize(now: BlockNumberFor<T>) -> Weight {
 			let mut read = 1u64;
 			let mut write = 0u64;
 
@@ -191,7 +191,7 @@ pub mod pallet {
 		_,
 		Blake2_128Concat,
 		NFTId,
-		AuctionData<T::AccountId, T::BlockNumber, BalanceOf<T>, T::BidderListLengthLimit>,
+		AuctionData<T::AccountId, BlockNumberFor<T>, BalanceOf<T>, T::BidderListLengthLimit>,
 		OptionQuery,
 	>;
 
@@ -210,7 +210,7 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn deadlines)]
 	pub type Deadlines<T: Config> =
-		StorageValue<_, DeadlineList<T::BlockNumber, T::ParallelAuctionLimit>, ValueQuery>;
+		StorageValue<_, DeadlineList<BlockNumberFor<T>, T::ParallelAuctionLimit>, ValueQuery>;
 
 	/// Holds the balance that user can claim
 	#[pallet::storage]
@@ -228,8 +228,8 @@ pub mod pallet {
 			creator: T::AccountId,
 			start_price: BalanceOf<T>,
 			buy_it_price: Option<BalanceOf<T>>,
-			start_block: T::BlockNumber,
-			end_block: T::BlockNumber,
+			start_block: BlockNumberFor<T>,
+			end_block: BlockNumberFor<T>,
 		},
 		/// An existing auction was cancelled.
 		AuctionCancelled { nft_id: NFTId },
@@ -343,8 +343,8 @@ pub mod pallet {
 			origin: OriginFor<T>,
 			nft_id: NFTId,
 			marketplace_id: MarketplaceId,
-			start_block: T::BlockNumber,
-			end_block: T::BlockNumber,
+			start_block: BlockNumberFor<T>,
+			end_block: BlockNumberFor<T>,
 			start_price: BalanceOf<T>,
 			buy_it_price: Option<BalanceOf<T>>,
 		) -> DispatchResultWithPostInfo {
@@ -668,7 +668,7 @@ impl<T: Config> Pallet<T> {
 		from: &T::AccountId,
 		amount: BalanceOf<T>,
 		nft: &NFTData<T::AccountId, <<T as Config>::NFTExt as NFTExt>::NFTOffchainDataLimit>,
-		auction: &AuctionData<T::AccountId, T::BlockNumber, BalanceOf<T>, T::BidderListLengthLimit>,
+		auction: &AuctionData<T::AccountId, BlockNumberFor<T>, BalanceOf<T>, T::BidderListLengthLimit>,
 	) -> Result<(BalanceOf<T>, BalanceOf<T>, BalanceOf<T>), DispatchError> {
 		let nft_creator = &nft.creator;
 		let nft_royalty = nft.royalty;
@@ -707,7 +707,7 @@ impl<T: Config> Pallet<T> {
 		})
 	}
 
-	pub fn has_started(now: T::BlockNumber, start_block: T::BlockNumber) -> bool {
+	pub fn has_started(now: BlockNumberFor<T>, start_block: BlockNumberFor<T>) -> bool {
 		now >= start_block
 	}
 
@@ -731,7 +731,7 @@ impl<T: Config> Pallet<T> {
 	pub fn fill_deadline_queue(
 		number: u32,
 		nft_id: NFTId,
-		block_number: T::BlockNumber,
+		block_number: BlockNumberFor<T>,
 	) -> Result<(), DispatchError> {
 		Deadlines::<T>::try_mutate(|x| -> DispatchResult {
 			x.bulk_insert(nft_id, block_number, number)

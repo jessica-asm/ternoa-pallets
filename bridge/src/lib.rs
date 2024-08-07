@@ -95,7 +95,7 @@ pub mod pallet {
 		type PalletId: Get<PalletId>;
 
 		#[pallet::constant]
-		type ProposalLifetime: Get<Self::BlockNumber>;
+		type ProposalLifetime: Get<BlockNumberFor<Self>>;
 
 		/// Type for setting initial number of votes required for a proposal to be executed (see
 		/// [RelayerVoteThreshold] in storage section).
@@ -138,7 +138,7 @@ pub mod pallet {
 		ChainId,
 		Blake2_256,
 		(DepositNonce, T::AccountId, BalanceOf<T>),
-		Proposal<T::AccountId, T::BlockNumber, T::RelayerCountLimit>,
+		Proposal<T::AccountId, BlockNumberFor<T>, T::RelayerCountLimit>,
 		OptionQuery,
 	>;
 

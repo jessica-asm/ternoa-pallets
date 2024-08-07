@@ -124,13 +124,13 @@ pub fn origin<T: Config>(name: &'static str) -> OriginFor<T> {
 }
 
 #[allow(dead_code)]
-pub fn run_to_block<T: Config>(n: T::BlockNumber) {
+pub fn run_to_block<T: Config>(n: BlockNumberFor<T>) {
 	while System::<T>::block_number() < n {
-		<TernoaAuctions<T> as OnFinalize<T::BlockNumber>>::on_finalize(System::<T>::block_number());
-		<System<T> as OnFinalize<T::BlockNumber>>::on_finalize(System::<T>::block_number());
+		<TernoaAuctions<T> as OnFinalize<BlockNumberFor<T>>>::on_finalize(System::<T>::block_number());
+		<System<T> as OnFinalize<BlockNumberFor<T>>>::on_finalize(System::<T>::block_number());
 		System::<T>::set_block_number(System::<T>::block_number() + 1u16.into());
-		<System<T> as OnInitialize<T::BlockNumber>>::on_initialize(System::<T>::block_number());
-		<TernoaAuctions<T> as OnInitialize<T::BlockNumber>>::on_initialize(
+		<System<T> as OnInitialize<BlockNumberFor<T>>>::on_initialize(System::<T>::block_number());
+		<TernoaAuctions<T> as OnInitialize<BlockNumberFor<T>>>::on_initialize(
 			System::<T>::block_number(),
 		);
 	}

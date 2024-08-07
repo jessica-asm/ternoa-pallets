@@ -29,10 +29,13 @@ pub use types::*;
 pub use weights::WeightInfo;
 
 use frame_support::{
-	dispatch::{DispatchError, DispatchResult, DispatchResultWithPostInfo},
+	sp_runtime::DispatchError,
+	dispatch::{DispatchResult, DispatchResultWithPostInfo},
 	traits::{ExistenceRequirement::KeepAlive, OnUnbalanced, StorageVersion, WithdrawReasons},
 	BoundedVec,
 };
+use frame_system::pallet_prelude::BlockNumberFor;
+
 use primitives::nfts::NFTId;
 use sp_runtime::SaturatedConversion;
 use sp_std::vec;
@@ -140,7 +143,7 @@ pub mod pallet {
 		_,
 		Blake2_128Concat,
 		NFTId,
-		TransmissionData<T::AccountId, T::BlockNumber, T::MaxConsentListSize>,
+		TransmissionData<T::AccountId, BlockNumberFor<T>, T::MaxConsentListSize>,
 		OptionQuery,
 	>;
 
@@ -159,12 +162,12 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn at_block_queue)]
 	pub type AtBlockQueue<T: Config> =
-		StorageValue<_, Queue<T::BlockNumber, T::SimultaneousTransmissionLimit>, ValueQuery>;
+		StorageValue<_, Queue<BlockNumberFor<T>, T::SimultaneousTransmissionLimit>, ValueQuery>;
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 		/// Weight: see `begin_block`
-		fn on_initialize(now: T::BlockNumber) -> Weight {
+		fn on_initialize(now: BlockNumberFor<T>) -> Weight {
 			let mut read = 2u64;
 			let mut write = 0u64;
 			let mut current_actions = 0;
@@ -210,10 +213,10 @@ pub mod pallet {
 			nft_id: NFTId,
 			recipient: T::AccountId,
 			protocol: TransmissionProtocol<
-				T::BlockNumber,
+				BlockNumberFor<T>,
 				ConsentList<T::AccountId, T::MaxConsentListSize>,
 			>,
-			cancellation: CancellationPeriod<T::BlockNumber>,
+			cancellation: CancellationPeriod<BlockNumberFor<T>>,
 		},
 		/// A protocol was removed
 		ProtocolRemoved {
@@ -221,7 +224,7 @@ pub mod pallet {
 		},
 		TimerReset {
 			nft_id: NFTId,
-			new_block_number: T::BlockNumber,
+			new_block_number: BlockNumberFor<T>,
 		},
 		ConsentAdded {
 			nft_id: NFTId,
@@ -311,10 +314,10 @@ pub mod pallet {
 			nft_id: NFTId,
 			recipient: T::AccountId,
 			protocol: TransmissionProtocol<
-				T::BlockNumber,
+				BlockNumberFor<T>,
 				ConsentList<T::AccountId, T::MaxConsentListSize>,
 			>,
-			cancellation: CancellationPeriod<T::BlockNumber>,
+			cancellation: CancellationPeriod<BlockNumberFor<T>>,
 		) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
 
@@ -478,7 +481,7 @@ pub mod pallet {
 		pub fn reset_timer(
 			origin: OriginFor<T>,
 			nft_id: NFTId,
-			block_number: T::BlockNumber,
+			block_number: BlockNumberFor<T>,
 		) -> DispatchResultWithPostInfo {
 			let who = ensure_signed(origin)?;
 			let now = frame_system::Pallet::<T>::block_number();
@@ -664,7 +667,7 @@ impl<T: Config> Pallet<T> {
 	pub fn fill_queue(
 		number: u32,
 		nft_id: NFTId,
-		block_number: T::BlockNumber,
+		block_number: BlockNumberFor<T>,
 	) -> Result<(), DispatchError> {
 		AtBlockQueue::<T>::try_mutate(|x| -> DispatchResult {
 			x.bulk_insert(nft_id, block_number, number)
